@@ -5,25 +5,32 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Doc } from "@convex/_generated/dataModel";
 
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "CLIENT" | "EMPLOYER" | "ADMIN";
+  enabled?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
 
 type UserFormProps = {
-  onSubmit: (data: Omit<Doc<"users">, "_id" | "_creationTime" | "enabled">) => void;
-  defaultValues?: Partial<Doc<"users"> | null>;
+  onSubmit: (data: Omit<BetterAuthUser, "id" | "createdAt" | "updatedAt">) => void;
+  defaultValues?: Partial<BetterAuthUser> | null;
   isPending: boolean;
 };
 
 const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  role: z.enum(["ADMIN", "PARKING", "RESTORER"]),
+  role: z.enum(["CLIENT", "EMPLOYER", "ADMIN"]),
   password: z.string().optional(),
 });
 
 export function UserForm({ onSubmit, defaultValues, isPending }: UserFormProps) {
-  const isEditMode = !!defaultValues?._id;
+  const isEditMode = !!defaultValues?.id;
 
   const form = useForm({
     defaultValues: {

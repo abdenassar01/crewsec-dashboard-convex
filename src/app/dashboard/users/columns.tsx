@@ -1,15 +1,24 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Doc, Id } from "convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "CLIENT" | "EMPLOYER" | "ADMIN";
+  enabled?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
 export const getColumns = (
-  onEdit: (user: Doc<"users">) => void,
-  onDelete: (userId: Id<"users">) => void
-): ColumnDef<Doc<"users">>[] => [
+  onEdit: (user: BetterAuthUser) => void,
+  onDelete: (userId: string) => void
+): ColumnDef<BetterAuthUser>[] => [
   {
-    accessorKey: "_id",
+    accessorKey: "id",
     header: "ID",
   },
   {
@@ -23,6 +32,7 @@ export const getColumns = (
   {
     accessorKey: "phoneNumber",
     header: "Phone",
+    cell: () => "N/A", // Better Auth users might not have phone number
   },
   {
     accessorKey: "role",
@@ -42,7 +52,7 @@ export const getColumns = (
             size="sm"
             onClick={() => {
               if (window.confirm("Are you sure you want to delete this user?")) {
-                onDelete(user._id);
+                onDelete(user.id);
               }
             }}
           >

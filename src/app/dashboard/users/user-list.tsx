@@ -17,23 +17,30 @@ import { UserForm } from "./user-form";
 import { getColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@convex/_generated/api";
-import type { Doc } from "@convex/_generated/dataModel";
+
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "CLIENT" | "EMPLOYER" | "ADMIN";
+  enabled?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
 
 export function UserList() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [editingUser, setEditingUser] = React.useState<Doc<"users"> | null>(
-    null
-  );
+  const [editingUser, setEditingUser] = React.useState<BetterAuthUser | null>(null);
 
   const { results, status, loadMore } = usePaginatedQuery(
-    api.usersAdmin.getUsers,
+    api.users.list,
     {},
     { initialNumItems: 10 }
   );
 
-  const createUser = useMutation(api.usersAdmin.createUser);
-  const updateUser = useMutation(api.usersAdmin.updateUser);
-  const deleteUser = useMutation(api.usersAdmin.deleteUser);
+  const createUser = useMutation(api.users.create);
+  const updateUser = useMutation(api.users.update);
+  const deleteUser = useMutation(api.users.deleteUser);
 
   const columns = React.useMemo(
     () =>
@@ -42,18 +49,18 @@ export function UserList() {
           setEditingUser(user);
           setIsDialogOpen(true);
         },
-        (userId) => deleteUser({ id: userId })
+        (userId) => deleteUser({ userId })
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [deleteUser]
   );
 
   const handleFormSubmit = async (
-    data: Omit<Doc<"users">, "_id" | "_creationTime" | "enabled">
+    data: Omit<BetterAuthUser, "id" | "createdAt" | "updatedAt">
   ) => {
     try {
       if (editingUser) {
-        await updateUser({ id: editingUser._id, ...data });
+        await updateUser({ userId: editingUser.id, ...data });
         toast.success("User updated!");
       } else {
         await createUser(data);

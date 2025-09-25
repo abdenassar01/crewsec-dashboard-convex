@@ -4,6 +4,7 @@ import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 import { betterAuth } from "better-auth";
+import { sign } from "crypto";
 
 const siteUrl = process.env.SITE_URL!;
 
@@ -21,13 +22,21 @@ export const createAuth = (
     logger: {
       disabled: optionsOnly,
     },
+
     baseURL: siteUrl,
     database: authComponent.adapter(ctx),
+    user: {
+      additionalFields: {
+        role: { type: "string", required: false, defaultValue: "CLIENT" },
+      },
+
+    },
     // Configure simple, non-verified email/password to get started
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
     },
+
     plugins: [
       // The Convex plugin is required for Convex compatibility
       convex(),

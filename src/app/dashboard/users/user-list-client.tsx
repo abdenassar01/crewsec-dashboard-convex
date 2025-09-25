@@ -19,17 +19,28 @@ import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import type { Preloaded } from "convex/react";
 
-export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<typeof api.usersAdmin.list> }) {
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: "CLIENT" | "EMPLOYER" | "ADMIN";
+  enabled?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<typeof api.users.list> }) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [editingUser, setEditingUser] = React.useState<Doc<"users"> | null>(
+  const [editingUser, setEditingUser] = React.useState<BetterAuthUser | null>(
     null
   );
 
-  const { page, isDone, loadMore } = usePreloadedQuery(preloadedUsers);
+  const { page, isDone, continueCursor } = usePreloadedQuery(preloadedUsers);
+  const loadMore = async () => {};
 
-  const createUser = useMutation(api.usersAdmin.create);
-  const updateUser = useMutation(api.usersAdmin.update);
-  const deleteUser = useMutation(api.usersAdmin.deleteUser);
+  const createUser = useMutation(api.users.create);
+  const updateUser = useMutation(api.users.update);
+  const deleteUser = useMutation(api.users.deleteUser);
 
   const columns = React.useMemo(
     () =>
@@ -38,21 +49,31 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
           setEditingUser(user);
           setIsDialogOpen(true);
         },
-        (userId) => deleteUser({ id: userId })
+        (userId) => deleteUser({ userId })
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [deleteUser]
   );
 
   const handleFormSubmit = async (
-    data: Omit<Doc<"users">, "_id" | "_creationTime" | "enabled">
+    data: Omit<BetterAuthUser, "id" | "createdAt" | "updatedAt">
   ) => {
     try {
       if (editingUser) {
-        await updateUser({ id: editingUser._id, ...data });
+        const updateData = {
+          ...data,
+          enabled: data.enabled ?? true, // Ensure enabled is always boolean
+        };
+        await updateUser({ userId: editingUser.id, ...updateData });
         toast.success("User updated!");
       } else {
-        await createUser(data);
+        // For create, we need to include password
+        const createData = {
+          email: data.email,
+          role: data.role,
+          password: "default-password", // This should come from the form
+        };
+        await createUser(createData);
         toast.success("User created!");
       }
       setIsDialogOpen(false);

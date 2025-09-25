@@ -19,7 +19,7 @@ type FormValues = {
   parkingLocation: string;
   parkingWebsite: string;
   parkingAddress: string;
-  userId?: Doc<"users">["_id"];
+  userId?: string;
 };
 
 type ParkingFormProps = {
