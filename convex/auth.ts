@@ -5,7 +5,7 @@ import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 import { betterAuth } from "better-auth";
 
-const siteUrl = process.env.SITE_URL! || 'http://localhost:3000';
+const siteUrl = process.env.SITE_URL!;
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
@@ -28,7 +28,6 @@ export const createAuth = (
       enabled: true,
       requireEmailVerification: false,
     },
-    trustedOrigins: [siteUrl],
     plugins: [
       // The Convex plugin is required for Convex compatibility
       convex(),

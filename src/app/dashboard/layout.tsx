@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 
-import { getToken } from "@/lib/auth/auth-server";
+// import { getToken } from "@/lib/auth/auth-server";
 import { DashboardSidebar } from "@/components";
 import { Logout01FreeIcons } from "@hugeicons/core-free-icons";
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const auth = await getToken()
+  // const auth = await getToken()
 
-  if(!auth) {
-    redirect("/login");
-  }
+  // if(!auth) {
+  //   redirect("/login");
+  // }
 
   return (
     <div className="grid h-screen w-full grid-cols-1 md:grid-cols-[280px_1fr]">

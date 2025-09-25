@@ -10,9 +10,9 @@ import { FieldInput, FormContext, ModeToggle } from "@/components";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Login01FreeIcons } from "@hugeicons/core-free-icons";
 
-import { authClient } from "@/lib";
 import { useState } from "react";
 import { redirect } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);

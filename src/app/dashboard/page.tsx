@@ -1,6 +1,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { api } from "@convex/_generated/api";
+import { preloadQuery } from "convex/nextjs";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+
+  const data = await preloadQuery(api.auth.getCurrentUser)
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
@@ -8,6 +13,8 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Total Parkings</CardTitle>
+            <div className="">{JSON.stringify(data)}</div>
+            {/* <CardTitle>Total Parkings</CardTitle> */}
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>

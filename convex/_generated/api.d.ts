@@ -9,17 +9,9 @@
  */
 
 import type * as actions from "../actions.js";
-import type * as auth_helpers from "../auth/helpers.js";
 import type * as auth from "../auth.js";
-import type * as controlFees from "../controlFees.js";
-import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
-import type * as parkings from "../parkings.js";
-import type * as staticData from "../staticData.js";
-import type * as storage from "../storage.js";
 import type * as users from "../users.js";
-import type * as usersAdmin from "../usersAdmin.js";
-import type * as vehicles from "../vehicles.js";
 
 import type {
   ApiFromModules,
@@ -37,17 +29,9 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
-  "auth/helpers": typeof auth_helpers;
   auth: typeof auth;
-  controlFees: typeof controlFees;
-  healthCheck: typeof healthCheck;
   http: typeof http;
-  parkings: typeof parkings;
-  staticData: typeof staticData;
-  storage: typeof storage;
   users: typeof users;
-  usersAdmin: typeof usersAdmin;
-  vehicles: typeof vehicles;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
