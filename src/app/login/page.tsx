@@ -10,60 +10,31 @@ import { FieldInput, FormContext, ModeToggle } from "@/components";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Login01FreeIcons } from "@hugeicons/core-free-icons";
 
-import { useState } from "react";
 import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
 
   const form = useForm({
     defaultValues: {
-      name: "",
       email: "",
       password: "",
-      confirmPassword: "",
     },
     onSubmit: async ({ value }) => {
-      if (isLogin) {
-        authClient.signIn.email({
-          email: value.email,
-          password: value.password,
-          callbackURL: "/",
-        }, {
-          onError: (data: any) => {
-            toast.error(data.error.message || "An error occurred");
-            console.log("Error data: ", data);
-          },
-          onSuccess: async (data) => {
-            toast.success('Login Successfully');
-            console.log('DATA: ', data);
-            redirect('/');
-          }
-        });
-      } else {
-        if (value.password !== value.confirmPassword) {
-          toast.error("Passwords do not match");
-          return;
+      authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+      }, {
+        onError: (data: any) => {
+          toast.error(data.error.message || "An error occurred");
+          console.log("Error data: ", data);
+        },
+        onSuccess: async (data) => {
+          console.log('__2__DATA: ', data);
+          toast.success('Login Successfully');
+          redirect('/');
         }
-
-        authClient.signUp.email({
-          email: value.email,
-          password: value.password,
-          name: value.name,
-
-          callbackURL: "/",
-        }, {
-          onError: (data: any) => {
-            toast.error(data.error.message || "An error occurred");
-            console.log("Error data Signup: ", data);
-          },
-          onSuccess: async () => {
-            toast.success('Account created successfully');
-            redirect('/');
-          }
-        });
-      }
+      });
     },
   });
 
@@ -75,7 +46,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl text-center">
-            {isLogin ? "Login" : "Sign Up"}
+            Login
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -88,15 +59,6 @@ export default function LoginPage() {
               }}
             >
               <div className="flex flex-col gap-3">
-                {!isLogin && (
-                  <FieldInput
-                    label="Name"
-                    name="name"
-                    placeholder="Full Name"
-                    form={form as any}
-                  />
-                )}
-
                 <FieldInput
                   label="Email"
                   name="email"
@@ -112,35 +74,13 @@ export default function LoginPage() {
                   form={form as any}
                 />
 
-                {!isLogin && (
-                  <FieldInput
-                    label="Confirm Password"
-                    name="confirmPassword"
-                    placeholder="****"
-                    password
-                    form={form as any}
-                  />
-                )}
-
                 <Button type="submit" className="w-full mt-2">
                   <HugeiconsIcon icon={Login01FreeIcons} className="" />
-                  <span>{isLogin ? "Login" : "Sign Up"}</span>
+                  <span>Login</span>
                 </Button>
               </div>
             </form>
           </FormContext.Provider>
-
-          <div className="mt-4 text-center">
-            <Button
-              variant="link"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Login"}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

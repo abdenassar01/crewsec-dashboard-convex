@@ -20,7 +20,7 @@ export default defineSchema({
     role: v.union(v.literal("CLIENT"), v.literal("EMPLOYER"), v.literal("ADMIN")),
     enabled: v.optional(v.boolean()),
     userId: v.string(), // Link to auth system user
-  }).index("by_email", ["email"]),
+  }).index("by_email", ["email"]).index("by_userId", ["userId"]),
 
   parkings: defineTable({
     name: v.string(),

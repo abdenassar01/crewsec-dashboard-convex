@@ -5,35 +5,24 @@ import { useMutation, usePreloadedQuery } from "convex/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DataTable } from "@/components/data-table";
-import { UserForm } from "./user-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UserForm } from "./user-form";
+import { UserFilters, type UserFilters as UserFiltersType } from "./user-filters";
+import { getColumns } from "./columns";
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import type { Preloaded } from "convex/react";
 
-interface BetterAuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: "CLIENT" | "EMPLOYER" | "ADMIN";
-  enabled?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
-
 export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<typeof api.users.list> }) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [editingUser, setEditingUser] = React.useState<BetterAuthUser | null>(
-    null
-  );
+  const [editingUser, setEditingUser] = React.useState<Doc<"users"> | null>(null);
+  const [filters, setFilters] = React.useState<UserFiltersType>({
+    searchTerm: "",
+    role: "",
+    enabled: null,
+  });
 
   const { page, isDone, continueCursor } = usePreloadedQuery(preloadedUsers);
   const loadMore = async () => {};
@@ -42,6 +31,58 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
   const updateUser = useMutation(api.users.update);
   const deleteUser = useMutation(api.users.deleteUser);
 
+  const handleDelete = (userId: Doc<"users">["_id"]) => {
+    deleteUser({ userId })
+      .then(() => toast.success("User deleted."))
+      .catch((err) => toast.error(err.message));
+  };
+
+  const handleFiltersChange = (newFilters: UserFiltersType) => {
+    setFilters(newFilters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      searchTerm: "",
+      role: "",
+      enabled: null,
+    });
+  };
+
+  // Filter results based on filters
+  const filteredResults = React.useMemo(() => {
+    return page.filter((user) => {
+      // Search term filter
+      if (filters.searchTerm) {
+        const searchLower = filters.searchTerm.toLowerCase();
+        const matchesSearch =
+          user.name?.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      // Role filter
+      if (filters.role && user.role !== filters.role) {
+        return false;
+      }
+
+      // Enabled filter
+      if (filters.enabled !== null && user.enabled !== filters.enabled) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [page, filters]);
+
+  const filtersComponent = (
+    <UserFilters
+      filters={filters}
+      onFiltersChange={handleFiltersChange}
+      onReset={handleResetFilters}
+    />
+  );
+
   const columns = React.useMemo(
     () =>
       getColumns(
@@ -49,39 +90,35 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
           setEditingUser(user);
           setIsDialogOpen(true);
         },
-        (userId) => deleteUser({ userId })
+        handleDelete
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deleteUser]
+    []
   );
 
-  const handleFormSubmit = async (
-    data: Omit<BetterAuthUser, "id" | "createdAt" | "updatedAt">
-  ) => {
+  const handleFormSubmit = async (data: any, isEdit: boolean) => {
     try {
-      if (editingUser) {
-        const updateData = {
+      if (isEdit) {
+        if (!editingUser) return;
+        await updateUser({
+          userId: editingUser._id,
           ...data,
-          enabled: data.enabled ?? true, // Ensure enabled is always boolean
-        };
-        await updateUser({ userId: editingUser.id, ...updateData });
-        toast.success("User updated!");
+        });
+        toast.success("User updated successfully!");
       } else {
-        // For create, we need to include password
-        const createData = {
-          email: data.email,
-          role: data.role,
-          password: "default-password", // This should come from the form
-        };
-        await createUser(createData);
-        toast.success("User created!");
+        await createUser({
+          ...data,
+        });
+        toast.success("New user created!");
       }
       setIsDialogOpen(false);
       setEditingUser(null);
-    } catch (error) {
-      toast.error((error as Error).message);
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred.");
     }
   };
+
+
 
   const isLoading = !isDone && page.length === 0;
 
@@ -105,11 +142,11 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
           }}
         >
           <DialogTrigger asChild>
-            <Button>Create User</Button>
+            <Button>Add New User</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[80svh] overflow-y-scroll">
             <DialogHeader>
-              <DialogTitle>{editingUser ? "Edit User" : "Create User"}</DialogTitle>
+              <DialogTitle>{editingUser ? "Edit User" : "Create New User"}</DialogTitle>
             </DialogHeader>
             <UserForm
               onSubmit={handleFormSubmit}
@@ -122,13 +159,15 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
 
       <DataTable
         columns={columns}
-        data={page ?? []}
-        loadMore={loadMore}
-        isDone={isDone}
+        data={filteredResults}
+        pageCount={isDone ? (filteredResults.length / 10) : (filteredResults.length / 10) + 1}
+        pageIndex={Math.floor(filteredResults.length / 10) - 1}
+        pageSize={10}
+        setPagination={() => {}} // Not needed with loadMore
+        loadMore={!isDone ? loadMore : undefined}
+        isLoading={isLoading}
+        filters={filtersComponent}
       />
     </div>
   );
 }
-
-// Import the getColumns function to keep it local
-import { getColumns } from "./columns";

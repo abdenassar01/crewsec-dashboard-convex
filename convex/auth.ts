@@ -2,9 +2,9 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { betterAuth } from "better-auth";
-import { sign } from "crypto";
+import { v } from "convex/values";
 
 const siteUrl = process.env.SITE_URL!;
 
@@ -27,7 +27,7 @@ export const createAuth = (
     database: authComponent.adapter(ctx),
     user: {
       additionalFields: {
-        role: { type: "string", required: false, defaultValue: "CLIENT" },
+        // role: { type: "string", required: false, defaultValue: "CLIENT" },
       },
 
     },
@@ -37,12 +37,44 @@ export const createAuth = (
       requireEmailVerification: false,
     },
 
+
     plugins: [
       // The Convex plugin is required for Convex compatibility
       convex(),
     ],
   });
 };
+
+// Mutation to sync user to Convex users table
+export const syncUserToConvex = mutation({
+  args: {
+    email: v.string(),
+    name: v.optional(v.string()),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
+
+    if (existingUser) {
+      return existingUser._id;
+    }
+
+    // Create new user in Convex users table
+    const userId = await ctx.db.insert("users", {
+      email: args.email,
+      name: args.name || args.email.split("@")[0],
+      role: "CLIENT",
+      enabled: true,
+      userId: args.userId,
+    });
+
+    return userId;
+  },
+});
 
 // Example function for getting the current user
 // Feel free to edit, omit, etc.

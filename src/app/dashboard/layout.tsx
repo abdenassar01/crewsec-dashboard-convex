@@ -1,13 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { HugeiconsIcon } from "@hugeicons/react";
+
 import Image from "next/image";
 
 // import { getToken } from "@/lib/auth/auth-server";
 import { DashboardSidebar } from "@/components";
-import { Logout01FreeIcons } from "@hugeicons/core-free-icons";
+import {LogoutButton} from "@/components/core";
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   // const auth = await getToken()
 
@@ -34,14 +32,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <div className="text-sm">
              <div className="">Hello world</div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start mt-2"
-              // onClick={() => signOut({ callbackUrl: "/login" })}
-            >
-              <HugeiconsIcon icon={Logout01FreeIcons} className="mr-2 h-4 w-4" /> Logout
-            </Button>
+            <LogoutButton />
           </div>
         </div>
       </aside>

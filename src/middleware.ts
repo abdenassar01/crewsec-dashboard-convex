@@ -35,17 +35,23 @@ export default async function middleware(request: NextRequest) {
 
   const isSignInRoute = signInRoutes.includes(request.nextUrl.pathname);
 
-  if (isSignInRoute && !sessionCookie) {
+  if (isSignInRoute && !session) {
     return NextResponse.next();
   }
 
-  if (!isSignInRoute && !sessionCookie) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (!isSignInRoute && !session) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isSignInRoute || request.nextUrl.pathname === "/") {
+  if (sessionCookie && isSignInRoute) {
     return NextResponse.redirect(
-      new URL("/dashboard/client-only", request.url),
+      new URL("/dashboard", request.url),
+    );
+  }
+
+  if (sessionCookie && request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(
+      new URL("/dashboard", request.url),
     );
   }
 

@@ -14,18 +14,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalFreeIcons } from "@hugeicons/core-free-icons";
 import type { Doc } from "@convex/_generated/dataModel";
 
-interface BetterAuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: "CLIENT" | "EMPLOYER" | "ADMIN";
-  enabled?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
-
 export type ParkingWithUser = Doc<"parkings"> & {
-  user: BetterAuthUser | null;
+  user: Doc<"users"> | null;
 };
 
 export const getColumns = (

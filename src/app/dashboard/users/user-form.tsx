@@ -5,20 +5,11 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface BetterAuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: "CLIENT" | "EMPLOYER" | "ADMIN";
-  enabled?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
+import type { Doc } from "@convex/_generated/dataModel";
 
 type UserFormProps = {
-  onSubmit: (data: Omit<BetterAuthUser, "id" | "createdAt" | "updatedAt">) => void;
-  defaultValues?: Partial<BetterAuthUser> | null;
+  onSubmit: (data: any, isEdit: boolean) => void;
+  defaultValues?: Partial<Doc<"users">> | null;
   isPending: boolean;
 };
 
@@ -26,20 +17,24 @@ const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
   role: z.enum(["CLIENT", "EMPLOYER", "ADMIN"]),
+  enabled: z.boolean().optional(),
   password: z.string().optional(),
 });
 
 export function UserForm({ onSubmit, defaultValues, isPending }: UserFormProps) {
-  const isEditMode = !!defaultValues?.id;
+  const isEditMode = !!defaultValues?._id;
 
   const form = useForm({
     defaultValues: {
-      name: defaultValues?.email?.split('@')[0] ?? "",
+      name: defaultValues?.name ?? "",
       email: defaultValues?.email ?? "",
       role: defaultValues?.role ?? "CLIENT",
+      enabled: defaultValues?.enabled ?? true,
       password: "",
     },
-    onSubmit: async ({ value }) => onSubmit(value as any),
+    onSubmit: async ({ value }) => {
+      await onSubmit(value, isEditMode);
+    },
     // defaultValidators: zodValidator(userSchema),
   });
 
@@ -58,7 +53,7 @@ export function UserForm({ onSubmit, defaultValues, isPending }: UserFormProps) 
         children={(field) => (
           <div>
             <Label htmlFor={field.name}>Name</Label>
-            <Input id={field.name} onChange={(e) => field.handleChange(e.target.value)} value={field.state.value} />
+            <Input id={field.name} onChange={(e) => field.handleChange(e.target.value as any)} value={field.state.value} />
             {field.state.meta.errors ? (
               <em className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</em>
             ) : null}
@@ -71,36 +66,51 @@ export function UserForm({ onSubmit, defaultValues, isPending }: UserFormProps) 
         children={(field) => (
           <div>
             <Label htmlFor={field.name}>Email</Label>
-            <Input type="email" id={field.name} onChange={(e) => field.handleChange(e.target.value)} value={field.state.value} />
+            <Input type="email" id={field.name} onChange={(e) => field.handleChange(e.target.value as any)} value={field.state.value} />
             {field.state.meta.errors ? (
               <em className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</em>
             ) : null}
           </div>
         )}
       />
-
-      {/* <form.Field
+      <form.Field
         name="role"
         validators={{ onChange: userSchema.shape.role }}
         children={(field) => (
           <div>
             <Label htmlFor={field.name}>Role</Label>
-            <Select onValueChange={field.handleChange} defaultValue={field.state.value}>
-              <SelectTrigger id={field.name}>
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="PARKING">Parking</SelectItem>
-                <SelectItem value="RESTORER">Restorer</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              id={field.name}
+              onChange={(e) => field.handleChange(e.target.value as any)}
+              value={field.state.value}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="CLIENT">Client</option>
+              <option value="EMPLOYER">Employer</option>
+              <option value="ADMIN">Admin</option>
+            </select>
             {field.state.meta.errors ? (
               <em className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</em>
             ) : null}
           </div>
         )}
-      /> */}
+      />
+      <form.Field
+        name="enabled"
+        children={(field) => (
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id={field.name}
+              checked={field.state.value}
+              onChange={(e) => field.handleChange(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            <Label htmlFor={field.name}>Enabled</Label>
+          </div>
+        )}
+      />
+
       {!isEditMode && (
         <form.Field
           name="password"
@@ -110,7 +120,7 @@ export function UserForm({ onSubmit, defaultValues, isPending }: UserFormProps) 
           children={(field) => (
             <div>
               <Label htmlFor={field.name}>Password</Label>
-              <Input type="password" id={field.name} onChange={(e) => field.handleChange(e.target.value)} value={field.state.value} />
+              <Input type="password" id={field.name} onChange={(e) => field.handleChange(e.target.value as any)} value={field.state.value} />
               {field.state.meta.errors ? (
                 <em className="text-xs text-destructive">{field.state.meta.errors.join(", ")}</em>
               ) : null}

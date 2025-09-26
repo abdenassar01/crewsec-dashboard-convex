@@ -5,18 +5,8 @@ import { api } from "@convex/_generated/api";
 import type { Preloaded } from "convex/react";
 import type { Doc } from "@convex/_generated/dataModel";
 
-interface BetterAuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: "CLIENT" | "EMPLOYER" | "ADMIN";
-  enabled?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
-
 type ParkingWithUser = Doc<"parkings"> & {
-  user: BetterAuthUser | null;
+  user: Doc<"users"> | null;
 };
 
 export function ParkingListClient({

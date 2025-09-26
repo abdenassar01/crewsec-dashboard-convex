@@ -2,25 +2,22 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-
-interface BetterAuthUser {
-  id: string;
-  email: string;
-  name: string;
-  role: "CLIENT" | "EMPLOYER" | "ADMIN";
-  enabled?: boolean;
-  createdAt?: number;
-  updatedAt?: number;
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreHorizontalFreeIcons } from "@hugeicons/core-free-icons";
+import type { Doc } from "@convex/_generated/dataModel";
 
 export const getColumns = (
-  onEdit: (user: BetterAuthUser) => void,
-  onDelete: (userId: string) => void
-): ColumnDef<BetterAuthUser>[] => [
-  {
-    accessorKey: "id",
-    header: "ID",
-  },
+  onEdit: (user: Doc<"users">) => void,
+  onDelete: (userId: Doc<"users">["_id"]) => void
+): ColumnDef<Doc<"users">>[] => [
   {
     accessorKey: "name",
     header: "Name",
@@ -30,35 +27,51 @@ export const getColumns = (
     header: "Email",
   },
   {
-    accessorKey: "phoneNumber",
-    header: "Phone",
-    cell: () => "N/A", // Better Auth users might not have phone number
-  },
-  {
     accessorKey: "role",
     header: "Role",
+  },
+  {
+    accessorKey: "enabled",
+    header: "Status",
+    cell: ({ row }) => (
+      <span className={row.original.enabled ? "text-green-600" : "text-red-600"}>
+        {row.original.enabled ? "Enabled" : "Disabled"}
+      </span>
+    ),
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
       return (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-            Edit
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete this user?")) {
-                onDelete(user.id);
-              }
-            }}
-          >
-            Delete
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <HugeiconsIcon icon={MoreHorizontalFreeIcons} className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user._id)}>
+              Copy User ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onEdit(user)}>
+              Edit User
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to delete this user?")) {
+                  onDelete(user._id);
+                }
+              }}
+            >
+              Delete User
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },
