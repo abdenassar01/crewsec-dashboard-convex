@@ -14,7 +14,7 @@ type ViolationFormProps = {
 
 const violationSchema = z.object({
   label: z.string().min(1, "Violation type is required"),
-  description: z.string().optional(),
+  number: z.number().min(1, "Number must be positive"),
 });
 
 export function ViolationForm({ onSubmit, defaultValues, isPending }: ViolationFormProps) {
@@ -23,7 +23,7 @@ export function ViolationForm({ onSubmit, defaultValues, isPending }: ViolationF
   const form = useForm({
     defaultValues: {
       label: defaultValues?.label ?? "",
-      description: defaultValues?.description ?? "",
+      number: defaultValues?.number ?? 1,
     },
     onSubmit: async ({ value }) => {
       await onSubmit(value, isEditMode);
@@ -48,10 +48,12 @@ export function ViolationForm({ onSubmit, defaultValues, isPending }: ViolationF
           required
         />
         <FieldInput
-          name="description"
-          label="Description"
-          placeholder="Enter description..."
+          name="number"
+          label="Number"
+          type="number"
+          placeholder="1"
           form={form}
+          required
         />
         <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save Violation"}

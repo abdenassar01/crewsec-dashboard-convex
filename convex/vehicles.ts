@@ -13,7 +13,7 @@ export const list = query({
     const pageWithParking = await Promise.all(
         vehicles.page.map(async (vehicle) => {
             const parking = await ctx.db.get(vehicle.parkingId);
-            return { ...vehicle, parking };
+            return { ...vehicle, parking: parking || undefined };
         })
     );
 

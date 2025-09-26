@@ -19,10 +19,11 @@ export function FieldInput({ name, label, placeholder, type = "text", password, 
       name={name}
       validators={{
         onChange: ({ value }) => {
-          if (required && !value) {
+          const stringValue = value as string;
+          if (required && !stringValue) {
             return `${label} is required`;
           }
-          if (type === "email" && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          if (type === "email" && stringValue && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stringValue)) {
             return "Invalid email address";
           }
           return undefined;
@@ -35,7 +36,7 @@ export function FieldInput({ name, label, placeholder, type = "text", password, 
             id={field.name}
             type={password ? "password" : type}
             placeholder={placeholder}
-            value={field.state.value || ""}
+            value={field.state.value as string | number || ""}
             onChange={(e) => field.handleChange(e.target.value)}
             onBlur={field.handleBlur}
           />
