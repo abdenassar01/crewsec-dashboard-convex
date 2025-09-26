@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import { FieldInput, FormContext } from "@/components/common/forms";
+import { ImageUpload } from "@/components/common/forms/ImageUpload";
+import { useImageUrl } from "@/hooks/use-image-url";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import type { ParkingWithUser } from "./columns";
 
@@ -20,6 +25,7 @@ type FormValues = {
   parkingWebsite: string;
   parkingAddress: string;
   userId?: string;
+  parkingImage?: File | null;
 };
 
 type ParkingFormProps = {
@@ -30,6 +36,12 @@ type ParkingFormProps = {
 
 export function ParkingForm({ onSubmit, defaultValues, isPending }: ParkingFormProps) {
   const isEditMode = !!defaultValues;
+  const { getUrl } = useImageUrl();
+  const deleteImage = useMutation(api.parkings.deleteImage);
+  const [currentImage, setCurrentImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    defaultValues?.imageStorageId ? getUrl(defaultValues.imageStorageId) : null
+  );
 
   const form = useForm({
     defaultValues: {
@@ -41,9 +53,39 @@ export function ParkingForm({ onSubmit, defaultValues, isPending }: ParkingFormP
       parkingWebsite: defaultValues?.website ?? "",
       parkingAddress: defaultValues?.address ?? "",
       userId: defaultValues?.userId,
+      parkingImage: null,
     },
-    onSubmit: ({ value }) => onSubmit(value, isEditMode),
+    onSubmit: async ({ value }) => {
+      // Handle image upload if needed
+      if (currentImage) {
+        // The parent component will handle the actual upload
+        onSubmit({ ...value, parkingImage: currentImage }, isEditMode);
+      } else {
+        onSubmit(value, isEditMode);
+      }
+    },
   });
+
+  const handleImageChange = (file: File | null) => {
+    setCurrentImage(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(defaultValues?.imageStorageId ? getUrl(defaultValues.imageStorageId) : null);
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (defaultValues?.imageStorageId) {
+      await deleteImage({ storageId: defaultValues.imageStorageId });
+    }
+    setCurrentImage(null);
+    setPreviewUrl(null);
+  };
 
   return (
     <FormContext.Provider value={form}>
@@ -65,6 +107,12 @@ export function ParkingForm({ onSubmit, defaultValues, isPending }: ParkingFormP
 
         <div className="space-y-4 rounded-md border p-4">
           <h3 className="text-lg font-semibold">Parking Details</h3>
+          <ImageUpload
+            value={previewUrl}
+            onChange={handleImageChange}
+            onRemove={handleImageRemove}
+            disabled={isPending}
+          />
           <FieldInput name="parkingName" label="Parking Name" placeholder="Main Street Parking" form={form} />
           <FieldInput name="parkingAddress" label="Address" placeholder="123 Main St" form={form} />
           <FieldInput name="parkingLocation" label="Location (e.g., City)" placeholder="Metropolis" form={form} />

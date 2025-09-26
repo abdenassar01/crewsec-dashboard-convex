@@ -30,6 +30,12 @@ export function ControlFeeListClient({ preloadedControlFees }: { preloadedContro
   const updateControlFee = useMutation(api.controlFees.update);
   const deleteControlFee = useMutation(api.controlFees.deleteFee);
 
+  const handleDelete = (feeId: Doc<"controlFees">["_id"]) => {
+    deleteControlFee({ id: feeId })
+      .then(() => toast.success("Control fee deleted."))
+      .catch((err) => toast.error(err.message));
+  };
+
   const handleFiltersChange = (newFilters: ControlFeeFiltersType) => {
     setFilters(newFilters);
   };
@@ -100,12 +106,6 @@ export function ControlFeeListClient({ preloadedControlFees }: { preloadedContro
     } catch (error: any) {
       toast.error(error.message || "An error occurred.");
     }
-  };
-
-  const handleDelete = (feeId: Doc<"controlFees">["_id"]) => {
-    deleteControlFee({ id: feeId })
-      .then(() => toast.success("Control fee deleted."))
-      .catch((err) => toast.error(err.message));
   };
 
   const isLoading = !Array.isArray(controlFeesData) && !controlFeesData?.page.length;

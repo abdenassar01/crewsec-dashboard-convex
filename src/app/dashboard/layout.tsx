@@ -1,17 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import Image from "next/image";
 
-// import { getToken } from "@/lib/auth/auth-server";
 import { DashboardSidebar } from "@/components";
 import {LogoutButton} from "@/components/core";
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  // const auth = await getToken()
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 
-  // if(!auth) {
-  //   redirect("/login");
-  // }
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const user = useQuery(api.auth.getCurrentUser);
 
   return (
     <div className="grid h-screen w-full grid-cols-1 md:grid-cols-[280px_1fr]">
@@ -29,8 +29,8 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             </nav>
           </div>
           <div className="mt-auto border-t p-4">
-            <div className="text-sm">
-             <div className="">Hello world</div>
+            <div>
+              {user?.name}
             </div>
             <LogoutButton />
           </div>

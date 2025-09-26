@@ -53,6 +53,23 @@ export const create = mutation({
   },
 });
 
+export const getUploadUrl = mutation({
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const deleteImage = mutation({
+  args: {
+    storageId: v.id("_storage"),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    await ctx.storage.delete(args.storageId);
+  },
+});
+
 export const update = mutation({
   args: {
     id: v.id("parkings"),
@@ -149,6 +166,7 @@ export const createUserAndParking = mutation({
     parkingLocation: v.string(),
     parkingWebsite: v.string(),
     parkingAddress: v.string(),
+    imageStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -168,7 +186,13 @@ export const createUserAndParking = mutation({
       throw new Error("User creation failed, could not retrieve user ID.");
     }
 
-    const newUserId = session.user.id as any; // Cast to Id<"users">
+    const user = await ctx.db.insert("users", {
+      email: args.email,
+      name: args.email.split('@')[0],
+      role: args.role,
+      enabled: true,
+      userId: session.user.id,
+    });
 
     // 2. Create the parking and associate it with the new user
     await ctx.db.insert("parkings", {
@@ -177,7 +201,8 @@ export const createUserAndParking = mutation({
       location: args.parkingLocation,
       website: args.parkingWebsite,
       address: args.parkingAddress,
-      userId: newUserId,
+      userId: user,
+      imageStorageId: args.imageStorageId,
       unresolvedFelparkering: 0,
       unresolvedMarkuleras: 0,
     });

@@ -12,6 +12,7 @@ import { ParkingForm } from "./parking-form";
 import { ParkingFilters, type ParkingFilters as ParkingFiltersType } from "./parking-filters";
 import type { Doc } from "@convex/_generated/dataModel";
 import { api } from "@convex/_generated/api";
+import { useMutation } from "convex/react";
 
 interface ParkingListProps {
   results: ParkingWithUser[];
@@ -42,6 +43,7 @@ export function ParkingList({
     availableOnly: false,
     unresolvedIssues: false,
   });
+  const getUploadUrl = useMutation(api.parkings.getUploadUrl);
 
   const handleFiltersChange = (newFilters: ParkingFiltersType) => {
     setFilters(newFilters);
@@ -126,6 +128,28 @@ export function ParkingList({
 
   const handleFormSubmit = async (data: any, isEdit: boolean) => {
     try {
+      let imageStorageId: string | undefined;
+
+      // Handle image upload if present
+      if (data.parkingImage && data.parkingImage instanceof File) {
+        // Get upload URL
+        const uploadUrl = await getUploadUrl();
+
+        // Upload file directly to the upload URL
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': data.parkingImage.type },
+          body: data.parkingImage,
+        });
+
+        if (response.ok) {
+          const { storageId } = await response.json();
+          imageStorageId = storageId;
+        } else {
+          throw new Error('Failed to upload image');
+        }
+      }
+
       if (isEdit) {
         if (!editingParking) return;
         await updateParking({
@@ -136,9 +160,11 @@ export function ParkingList({
           website: data.parkingWebsite,
           address: data.parkingAddress,
           userId: data.userId, // This should already be set from defaultValues
+          imageStorageId: imageStorageId || editingParking.imageStorageId,
         });
         toast.success("Parking updated successfully!");
       } else {
+        // For create, use the updated createUserAndParking with image support
         await createUserAndParking({
           email: data.email,
           password: data.password,
@@ -148,7 +174,9 @@ export function ParkingList({
           parkingLocation: data.parkingLocation,
           parkingWebsite: data.parkingWebsite,
           parkingAddress: data.parkingAddress,
+          imageStorageId: imageStorageId,
         });
+
         toast.success("New user and parking created!");
       }
       setIsDialogOpen(false);

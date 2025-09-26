@@ -23,6 +23,27 @@ export const getColumns = (
   onAnonymize: (parkingId: Doc<"parkings">["_id"]) => void
 ): ColumnDef<ParkingWithUser>[] => [
   {
+    accessorKey: "imageStorageId",
+    header: "Image",
+    cell: ({ row }) => {
+      const parking = row.original;
+      if (parking.imageStorageId) {
+        return (
+          <img
+            src={`/api/storage/${parking.imageStorageId}`}
+            alt={parking.name}
+            className="w-12 h-12 object-cover rounded-md"
+          />
+        );
+      }
+      return (
+        <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center text-gray-500 text-xs">
+          No Image
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "name",
     header: "Parking Name",
   },
