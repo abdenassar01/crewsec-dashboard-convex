@@ -11,14 +11,18 @@
 import type * as actions from "../actions.js";
 import type * as auth_helpers from "../auth/helpers.js";
 import type * as auth from "../auth.js";
+import type * as canceledViolations from "../canceledViolations.js";
 import type * as controlFees from "../controlFees.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
+import type * as locationViolations from "../locationViolations.js";
 import type * as parkings from "../parkings.js";
 import type * as staticData from "../staticData.js";
 import type * as storage from "../storage.js";
+import type * as towns from "../towns.js";
 import type * as users from "../users.js";
 import type * as vehicles from "../vehicles.js";
+import type * as violations from "../violations.js";
 
 import type {
   ApiFromModules,
@@ -38,14 +42,18 @@ declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   "auth/helpers": typeof auth_helpers;
   auth: typeof auth;
+  canceledViolations: typeof canceledViolations;
   controlFees: typeof controlFees;
   healthCheck: typeof healthCheck;
   http: typeof http;
+  locationViolations: typeof locationViolations;
   parkings: typeof parkings;
   staticData: typeof staticData;
   storage: typeof storage;
+  towns: typeof towns;
   users: typeof users;
   vehicles: typeof vehicles;
+  violations: typeof violations;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

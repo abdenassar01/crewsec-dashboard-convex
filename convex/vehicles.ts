@@ -3,6 +3,24 @@ import { mutation, query } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { requireAdmin } from "./auth/helpers";
 
+// Query to get all vehicles
+export const list = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const vehicles = await ctx.db.query("vehicles").order("desc").paginate(args.paginationOpts);
+
+    const pageWithParking = await Promise.all(
+        vehicles.page.map(async (vehicle) => {
+            const parking = await ctx.db.get(vehicle.parkingId);
+            return { ...vehicle, parking };
+        })
+    );
+
+    return { ...vehicles, page: pageWithParking };
+  },
+});
+
 /**
  * Search for vehicles by reference, optionally filtered by parkingId.
  */

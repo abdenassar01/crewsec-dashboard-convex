@@ -59,7 +59,7 @@ export default defineSchema({
     cause: v.union(v.literal("FELPARKERING"), v.literal("MAKULERA")),
     resolved: v.boolean(),
     parkingId: v.id("parkings"),
-  }).index("by_parkingId", ["parkingId"]),
+  }).index("by_parkingId", ["parkingId"]).index("by_cause", ["cause"]),
 
   controlFees: defineTable({
     reference: v.string(),

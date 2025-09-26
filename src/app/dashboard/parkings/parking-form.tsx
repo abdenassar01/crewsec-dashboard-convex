@@ -58,18 +58,18 @@ export function ParkingForm({ onSubmit, defaultValues, isPending }: ParkingFormP
         {!isEditMode && (
           <div className="space-y-4 rounded-md border p-4">
             <h3 className="text-lg font-semibold">New User Details</h3>
-            <FieldInput  name="email" label="Email" placeholder="user@example.com" type="email" />
-            <FieldInput name="password" label="Password" type="password" placeholder="••••••••" />
+            <FieldInput  name="email" label="Email" placeholder="user@example.com" type="email" form={form} />
+            <FieldInput name="password" label="Password" type="password" placeholder="••••••••" form={form} />
           </div>
         )}
 
         <div className="space-y-4 rounded-md border p-4">
           <h3 className="text-lg font-semibold">Parking Details</h3>
-          <FieldInput name="parkingName" label="Parking Name" placeholder="Main Street Parking" />
-          <FieldInput name="parkingAddress" label="Address" placeholder="123 Main St" />
-          <FieldInput name="parkingLocation" label="Location (e.g., City)" placeholder="Metropolis" />
-          <FieldInput name="parkingWebsite" label="Website URL" placeholder="https://parking.com" />
-          <FieldInput name="parkingDescription" label="Description" placeholder="A short description..." />
+          <FieldInput name="parkingName" label="Parking Name" placeholder="Main Street Parking" form={form} />
+          <FieldInput name="parkingAddress" label="Address" placeholder="123 Main St" form={form} />
+          <FieldInput name="parkingLocation" label="Location (e.g., City)" placeholder="Metropolis" form={form} />
+          <FieldInput name="parkingWebsite" label="Website URL" placeholder="https://parking.com" form={form} />
+          <FieldInput name="parkingDescription" label="Description" placeholder="A short description..." form={form} />
         </div>
 
         <Button type="submit" disabled={isPending} className="w-full">
