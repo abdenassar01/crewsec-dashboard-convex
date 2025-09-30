@@ -16,6 +16,7 @@ import type * as controlFees from "../controlFees.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as locationViolations from "../locationViolations.js";
+import type * as notifications from "../notifications.js";
 import type * as parkings from "../parkings.js";
 import type * as staticData from "../staticData.js";
 import type * as storage from "../storage.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   healthCheck: typeof healthCheck;
   http: typeof http;
   locationViolations: typeof locationViolations;
+  notifications: typeof notifications;
   parkings: typeof parkings;
   staticData: typeof staticData;
   storage: typeof storage;
@@ -5333,6 +5335,167 @@ export declare const components: {
               };
         },
         any
+      >;
+    };
+  };
+  pushNotifications: {
+    public: {
+      deleteNotificationsForUser: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR"; userId: string },
+        any
+      >;
+      getNotification: FunctionReference<
+        "query",
+        "internal",
+        { id: string; logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR" },
+        null | {
+          _contentAvailable?: boolean;
+          _creationTime: number;
+          badge?: number;
+          body?: string;
+          categoryId?: string;
+          channelId?: string;
+          data?: any;
+          expiration?: number;
+          interruptionLevel?:
+            | "active"
+            | "critical"
+            | "passive"
+            | "time-sensitive";
+          mutableContent?: boolean;
+          numPreviousFailures: number;
+          priority?: "default" | "normal" | "high";
+          sound?: string | null;
+          state:
+            | "awaiting_delivery"
+            | "in_progress"
+            | "delivered"
+            | "needs_retry"
+            | "failed"
+            | "maybe_delivered"
+            | "unable_to_deliver";
+          subtitle?: string;
+          title?: string;
+          ttl?: number;
+        }
+      >;
+      getNotificationsForUser: FunctionReference<
+        "query",
+        "internal",
+        {
+          limit?: number;
+          logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR";
+          userId: string;
+        },
+        Array<{
+          _contentAvailable?: boolean;
+          _creationTime: number;
+          badge?: number;
+          body?: string;
+          categoryId?: string;
+          channelId?: string;
+          data?: any;
+          expiration?: number;
+          id: string;
+          interruptionLevel?:
+            | "active"
+            | "critical"
+            | "passive"
+            | "time-sensitive";
+          mutableContent?: boolean;
+          numPreviousFailures: number;
+          priority?: "default" | "normal" | "high";
+          sound?: string | null;
+          state:
+            | "awaiting_delivery"
+            | "in_progress"
+            | "delivered"
+            | "needs_retry"
+            | "failed"
+            | "maybe_delivered"
+            | "unable_to_deliver";
+          subtitle?: string;
+          title?: string;
+          ttl?: number;
+        }>
+      >;
+      getStatusForUser: FunctionReference<
+        "query",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR"; userId: string },
+        { hasToken: boolean; paused: boolean }
+      >;
+      pauseNotificationsForUser: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR"; userId: string },
+        null
+      >;
+      recordPushNotificationToken: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR";
+          pushToken: string;
+          userId: string;
+        },
+        null
+      >;
+      removePushNotificationToken: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR"; userId: string },
+        null
+      >;
+      restart: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR" },
+        boolean
+      >;
+      sendPushNotification: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          allowUnregisteredTokens?: boolean;
+          logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR";
+          notification: {
+            _contentAvailable?: boolean;
+            badge?: number;
+            body?: string;
+            categoryId?: string;
+            channelId?: string;
+            data?: any;
+            expiration?: number;
+            interruptionLevel?:
+              | "active"
+              | "critical"
+              | "passive"
+              | "time-sensitive";
+            mutableContent?: boolean;
+            priority?: "default" | "normal" | "high";
+            sound?: string | null;
+            subtitle?: string;
+            title?: string;
+            ttl?: number;
+          };
+          userId: string;
+        },
+        string | null
+      >;
+      shutdown: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR" },
+        { data?: any; message: string }
+      >;
+      unpauseNotificationsForUser: FunctionReference<
+        "mutation",
+        "internal",
+        { logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR"; userId: string },
+        null
       >;
     };
   };
