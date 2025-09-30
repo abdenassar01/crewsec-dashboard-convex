@@ -1,6 +1,6 @@
 import { AuthFunctions, createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
-import { components, internal } from "./_generated/api";
+import { api, components, internal } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 import { betterAuth } from "better-auth";
@@ -16,6 +16,7 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
   triggers: {
     user: {
       async onCreate(ctx, doc) {
+          console.log("Registered new user: ", doc.email)
           await ctx.db.insert("users", {
             email: doc.email,
             name: doc.name,
@@ -41,7 +42,7 @@ export const createAuth = (
     database: authComponent.adapter(ctx),
     user: {
       additionalFields: {
-        role: { type: "string", required: false, defaultValue: "CLIENT" },
+        //role: { type: "string", required: false, defaultValue: "CLIENT" },
       },
 
     },
@@ -62,9 +63,7 @@ export const createAuth = (
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    const auth = await authComponent.getAuthUser(ctx);
-    console.log("AUTH: ", auth)
-    return auth;
+    return authComponent.getAuthUser(ctx);
   },
 });
 

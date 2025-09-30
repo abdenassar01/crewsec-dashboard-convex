@@ -7,6 +7,7 @@ import type { Doc } from "@convex/_generated/dataModel";
 
 type ParkingWithUser = Doc<"parkings"> & {
   user: Doc<"users"> | null;
+  imageUrl: string | null;
 };
 
 export function ParkingListClient({
@@ -26,7 +27,6 @@ export function ParkingListClient({
   // Map results to include user: null (since we removed user joining)
   const resultsWithUser: ParkingWithUser[] = results.map(parking => ({
     ...parking,
-    user: null
   }));
 
   // Create a wrapper function that matches the expected interface

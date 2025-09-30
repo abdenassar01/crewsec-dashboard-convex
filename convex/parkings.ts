@@ -14,7 +14,8 @@ export const list = query({
     const pageWithUsers = await Promise.all(
         parkings.page.map(async (parking) => {
             const user = await ctx.db.get(parking.userId);
-            return { ...parking, user };
+            const imageUrl = parking.imageStorageId ? await ctx.storage.getUrl(parking.imageStorageId) : null;
+            return { ...parking, user, imageUrl };
         })
     );
 
@@ -178,7 +179,6 @@ export const createUserAndParking = mutation({
         email: args.email,
         password: args.password,
         name: `${args.email.split('@')[0]}`, // Default name from email prefix
-        role: args.role,
       },
     });
 

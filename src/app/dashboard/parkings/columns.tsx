@@ -16,6 +16,7 @@ import type { Doc } from "@convex/_generated/dataModel";
 
 export type ParkingWithUser = Doc<"parkings"> & {
   user: Doc<"users"> | null;
+  imageUrl: string | null;
 };
 
 export const getColumns = (
@@ -23,14 +24,14 @@ export const getColumns = (
   onAnonymize: (parkingId: Doc<"parkings">["_id"]) => void
 ): ColumnDef<ParkingWithUser>[] => [
   {
-    accessorKey: "imageStorageId",
+    accessorKey: "imageUrl",
     header: "Image",
     cell: ({ row }) => {
       const parking = row.original;
-      if (parking.imageStorageId) {
+      if (parking.imageUrl) {
         return (
           <img
-            src={`/api/storage/${parking.imageStorageId}`}
+            src={parking.imageUrl}
             alt={parking.name}
             className="w-12 h-12 object-cover rounded-md"
           />
@@ -48,7 +49,7 @@ export const getColumns = (
     header: "Parking Name",
   },
   {
-    accessorFn: (row) => row.user?.email,
+    accessorFn: (row) => row.user?.name,
     header: "Assigned User",
   },
   {
@@ -68,6 +69,7 @@ export const getColumns = (
     id: "actions",
     cell: ({ row }) => {
       const parking = row.original;
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

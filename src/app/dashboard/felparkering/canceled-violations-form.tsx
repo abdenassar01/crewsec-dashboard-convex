@@ -37,7 +37,6 @@ const causeColors = {
 export function CanceledViolationsForm({ onSubmit, defaultValues, isPending }: CanceledViolationsFormProps) {
   const isEditMode = !!defaultValues?._id;
   const parkings = useQuery(api.parkings.list, { paginationOpts: { numItems: 100, cursor: null } });
-
   const form = useForm({
     defaultValues: {
       reference: defaultValues?.reference ?? "",
