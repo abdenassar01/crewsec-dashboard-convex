@@ -14,6 +14,7 @@ import { getColumns } from "./columns";
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import type { Preloaded } from "convex/react";
+import { authClient } from "@/lib/auth-client";
 
 export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<typeof api.users.list> }) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -27,7 +28,6 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
   const { page, isDone, continueCursor } = usePreloadedQuery(preloadedUsers);
   const loadMore = async () => {};
 
-  const createUser = useMutation(api.users.create);
   const updateUser = useMutation(api.users.update);
   const deleteUser = useMutation(api.users.deleteUser);
 
@@ -106,7 +106,7 @@ export function UserListClient({ preloadedUsers }: { preloadedUsers: Preloaded<t
         });
         toast.success("User updated successfully!");
       } else {
-        await createUser({
+        await authClient.signUp.email({
           ...data,
         });
         toast.success("New user created!");

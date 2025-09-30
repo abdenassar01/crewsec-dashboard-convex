@@ -2,22 +2,27 @@ import { api } from "@convex/_generated/api";
 import { QueryCtx, MutationCtx } from "../_generated/server";
 import { authComponent } from "../auth";
 
-export const requireAdmin = async (ctx: QueryCtx | MutationCtx) => {
+export const getAuthenticatedUser = async (ctx: QueryCtx | MutationCtx) => {
   const authUser = await authComponent.getAuthUser(ctx);
   console.log("[Debug (Auth User)]: ", authUser);
 
   if (!authUser) {
-      throw new Error("Not authenticated");
+    throw new Error("Not authenticated");
   }
 
   if (!authUser._id) {
-      throw new Error("User is disabled");
+    throw new Error("User is disabled");
   }
 
   const user = await ctx.db.query("users")
-      .withIndex("by_email", q => q.eq("email", authUser?.email!))
-      .unique();
-  console.log("[Debug (User)]: ", user);
+    .withIndex("by_userId", q => q.eq("userId", authUser?._id!))
+    .unique();
+
+  return user;
+}
+
+export const requireAdmin = async (ctx: QueryCtx | MutationCtx) => {
+  const user = await getAuthenticatedUser(ctx);
 
   // Check if user has ADMIN role in Better Auth
   // The role might be in additionalFields or as a direct property
@@ -25,5 +30,5 @@ export const requireAdmin = async (ctx: QueryCtx | MutationCtx) => {
     throw new Error("Not authorized");
   }
 
-  return authUser;
+  return user;
 }

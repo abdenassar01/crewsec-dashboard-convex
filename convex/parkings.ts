@@ -178,7 +178,7 @@ export const createUserAndParking = mutation({
         email: args.email,
         password: args.password,
         name: `${args.email.split('@')[0]}`, // Default name from email prefix
-        // role: args.role,
+        role: args.role,
       },
     });
 
@@ -186,22 +186,29 @@ export const createUserAndParking = mutation({
       throw new Error("User creation failed, could not retrieve user ID.");
     }
 
-    const user = await ctx.db.insert("users", {
-      email: args.email,
-      name: args.email.split('@')[0],
-      role: args.role,
-      enabled: true,
-      userId: session.user.id,
-    });
+    let user = await ctx.db.query("users").withIndex("by_userId", q => q.eq("userId", session.user.id)).unique()
 
-    // 2. Create the parking and associate it with the new user
+    let userId = null
+
+    if(!user){
+      userId = await ctx.db.insert("users", {
+        email: args.email,
+        name: args.email.split('@')[0],
+        role: args.role,
+        enabled: true,
+        userId: session.user.id,
+      });
+    } else {
+      userId = user._id
+    }
+
     await ctx.db.insert("parkings", {
       name: args.parkingName,
       description: args.parkingDescription,
       location: args.parkingLocation,
       website: args.parkingWebsite,
       address: args.parkingAddress,
-      userId: user,
+      userId,
       imageStorageId: args.imageStorageId,
       unresolvedFelparkering: 0,
       unresolvedMarkuleras: 0,
