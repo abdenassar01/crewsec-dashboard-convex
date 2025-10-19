@@ -85,16 +85,16 @@ export function ParkingList({
       // Available only filter
       if (filters.availableOnly) {
         const hasUnresolvedIssues =
-          (parking.unresolvedMarkuleras > 0) ||
-          (parking.unresolvedFelparkering > 0);
+          ((parking.unresolvedMarkuleras || 0) > 0) ||
+          ((parking.unresolvedFelparkering || 0) > 0);
         if (hasUnresolvedIssues) return false;
       }
 
       // Unresolved issues filter
       if (filters.unresolvedIssues) {
-        const hasUnresolvedIssues =
-          (parking.unresolvedMarkuleras > 0) ||
-          (parking.unresolvedFelparkering > 0);
+       const hasUnresolvedIssues =
+          ((parking.unresolvedMarkuleras || 0) > 0) ||
+          ((parking.unresolvedFelparkering || 0) > 0);
         if (!hasUnresolvedIssues) return false;
       }
 
@@ -108,8 +108,8 @@ export function ParkingList({
         // For now, we'll assume all parkings are available if they have no unresolved issues
         if (filters.availableOnly) {
           const hasUnresolvedIssues =
-            (parking.unresolvedMarkuleras > 0) ||
-            (parking.unresolvedFelparkering > 0);
+          ((parking.unresolvedMarkuleras || 0) > 0) ||
+          ((parking.unresolvedFelparkering || 0) > 0);
           if (hasUnresolvedIssues) return false;
         }
       }

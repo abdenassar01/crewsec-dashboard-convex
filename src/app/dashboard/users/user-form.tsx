@@ -15,8 +15,8 @@ type UserFormProps = {
 
 const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  role: z.enum(["CLIENT", "EMPLOYER", "ADMIN"]),
+  email: z.email("Invalid email address"),
+  role: z.enum(["CLIENT", "EMPLOYEE", "ADMIN"]),
   enabled: z.boolean().optional(),
   password: z.string().optional(),
 });

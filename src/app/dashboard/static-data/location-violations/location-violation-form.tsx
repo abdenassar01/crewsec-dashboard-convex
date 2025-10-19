@@ -23,8 +23,8 @@ const locationViolationSchema = z.object({
 
 export function LocationViolationForm({ onSubmit, defaultValues, isPending }: LocationViolationFormProps) {
   const isEditMode = !!defaultValues?._id;
-  const locations = useQuery(api.staticData.listLocations, { paginationOpts: { numItems: 100, cursor: null } });
-  const violations = useQuery(api.staticData.listViolations, { paginationOpts: { numItems: 100, cursor: null } });
+  const locations = useQuery(api.staticData.listLocations, {  search: '' });
+  const violations = useQuery(api.staticData.listViolations, { search: ''});
 
   const form = useForm({
     defaultValues: {
@@ -69,7 +69,7 @@ export function LocationViolationForm({ onSubmit, defaultValues, isPending }: Lo
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
                 <SelectContent>
-                  {locations?.page.map((location) => (
+                  {locations?.map((location) => (
                     <SelectItem key={location._id} value={location._id}>
                       {location.label}
                     </SelectItem>
@@ -96,7 +96,7 @@ export function LocationViolationForm({ onSubmit, defaultValues, isPending }: Lo
                   <SelectValue placeholder="Select violation" />
                 </SelectTrigger>
                 <SelectContent>
-                  {violations?.page.map((violation) => (
+                  {violations?.map((violation) => (
                     <SelectItem key={violation._id} value={violation._id}>
                       {violation.label} (#{violation.number})
                     </SelectItem>

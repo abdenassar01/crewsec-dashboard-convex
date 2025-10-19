@@ -36,7 +36,7 @@ const causeColors = {
 
 export function CanceledViolationsForm({ onSubmit, defaultValues, isPending }: CanceledViolationsFormProps) {
   const isEditMode = !!defaultValues?._id;
-  const parkings = useQuery(api.parkings.list, { paginationOpts: { numItems: 100, cursor: null } });
+  const parkings = useQuery(api.parkings.list, {query: ''});
   const form = useForm({
     defaultValues: {
       reference: defaultValues?.reference ?? "",
@@ -108,7 +108,7 @@ export function CanceledViolationsForm({ onSubmit, defaultValues, isPending }: C
                   <SelectValue placeholder="Select parking" />
                 </SelectTrigger>
                 <SelectContent>
-                  {parkings?.page.map((parking) => (
+                  {parkings?.map((parking) => (
                     <SelectItem key={parking._id} value={parking._id}>
                       {parking.name}
                     </SelectItem>
