@@ -1,1 +1,2 @@
-export * from './logout-button'
+export * from "./logout-button";
+export * from "./theme-toggle";

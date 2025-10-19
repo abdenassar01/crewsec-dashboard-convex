@@ -60,7 +60,7 @@ export function UserFilters({ filters, onFiltersChange, onReset }: UserFiltersPr
           >
             <option value="">All Roles</option>
             <option value="CLIENT">Client</option>
-            <option value="EMPLOYER">Employer</option>
+            <option value="EMPLOYEE">Employee</option>
             <option value="ADMIN">Admin</option>
           </select>
         </div>

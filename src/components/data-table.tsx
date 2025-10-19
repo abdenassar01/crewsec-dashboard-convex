@@ -36,7 +36,6 @@ export function DataTable<TData, TValue>({
   pageCount,
   pageIndex = 0,
   pageSize = 10,
-  setPagination,
   loadMore,
   isLoading = false,
   filters,

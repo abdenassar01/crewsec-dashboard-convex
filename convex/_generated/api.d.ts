@@ -13,6 +13,8 @@ import type * as auth_helpers from "../auth/helpers.js";
 import type * as auth from "../auth.js";
 import type * as canceledViolations from "../canceledViolations.js";
 import type * as controlFees from "../controlFees.js";
+import type * as easypark from "../easypark.js";
+import type * as files from "../files.js";
 import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as locationViolations from "../locationViolations.js";
@@ -45,6 +47,8 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   canceledViolations: typeof canceledViolations;
   controlFees: typeof controlFees;
+  easypark: typeof easypark;
+  files: typeof files;
   healthCheck: typeof healthCheck;
   http: typeof http;
   locationViolations: typeof locationViolations;

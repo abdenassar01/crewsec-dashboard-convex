@@ -1,4 +1,8 @@
-import { AuthFunctions, createClient, type GenericCtx } from "@convex-dev/better-auth";
+import {
+  AuthFunctions,
+  createClient,
+  type GenericCtx,
+} from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { api, components, internal } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
@@ -7,7 +11,7 @@ import { betterAuth } from "better-auth";
 
 const siteUrl = process.env.SITE_URL!;
 
-const authFunctions: AuthFunctions = internal.auth
+const authFunctions: AuthFunctions = internal.auth;
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
@@ -16,16 +20,10 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
   triggers: {
     user: {
       async onCreate(ctx, doc) {
-          console.log("Registered new user: ", doc.email)
-          await ctx.db.insert("users", {
-            email: doc.email,
-            name: doc.name,
-            role: 'CLIENT',
-            userId: doc._id
-          })
+        console.log("Registered new user: ", doc.email);
       },
-    }
-  }
+    },
+  },
 });
 
 export const createAuth = (
@@ -44,8 +42,8 @@ export const createAuth = (
       additionalFields: {
         //role: { type: "string", required: false, defaultValue: "CLIENT" },
       },
-
     },
+    trustedOrigins: ["http://localhost:3000"],
     // Configure simple, non-verified email/password to get started
     emailAndPassword: {
       enabled: true,

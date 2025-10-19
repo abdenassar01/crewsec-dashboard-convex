@@ -14,40 +14,37 @@ import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
-
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     },
     onSubmit: async ({ value }) => {
-      authClient.signIn.email({
-        email: value.email,
-        password: value.password,
-      }, {
-        onError: (data: any) => {
-          toast.error(data.error.message || "An error occurred");
-          console.log("Error data: ", data);
+      authClient.signIn.email(
+        {
+          email: value.email,
+          password: value.password,
         },
-        onSuccess: async (data) => {
-          console.log('__2__DATA: ', data);
-          toast.success('Login Successfully');
-          redirect('/');
-        }
-      });
+        {
+          onError: (data: any) => {
+            toast.error(data.error.message || "An error occurred");
+            console.log("Error data: ", data);
+          },
+          onSuccess: async (data) => {
+            console.log("__2__DATA: ", data);
+            toast.success("Login Successfully");
+            redirect("/");
+          },
+        },
+      );
     },
   });
 
   return (
     <div className="flex bg-[url('/login-background.webp')] min-h-screen items-center justify-center bg-cover bg-no-repeat">
-      <div className="absolute top-5 right-5">
-        <ModeToggle />
-      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            Login
-          </CardTitle>
+          <CardTitle className="text-2xl text-center">Login</CardTitle>
         </CardHeader>
         <CardContent>
           <FormContext.Provider value={form}>
