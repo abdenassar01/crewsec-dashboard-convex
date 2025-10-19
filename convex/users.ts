@@ -1,15 +1,35 @@
-import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
-import { requireAdmin } from "./auth/helpers";
-import { paginationOptsValidator } from "convex/server";
-import { authComponent, createAuth } from "./auth";
+import { paginationOptsValidator } from 'convex/server';
+import { v } from 'convex/values';
+
+import { mutation, query } from './_generated/server';
+import { authComponent, createAuth } from './auth';
+import { getAuthenticatedUser, requireAdmin } from './auth/helpers';
 
 // Query to get all users from Convex users table
 export const list = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    const users = await ctx.db.query("users").order("desc").paginate(args.paginationOpts);
+    const users = await ctx.db
+      .query('users')
+      .order('desc')
+      .paginate(args.paginationOpts);
+    return users;
+  },
+});
+
+export const getUsersByRole = query({
+  args: { role: v.string() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+    const users = await ctx.db
+      .query('users')
+      .withIndex('by_role', (q) =>
+        q.eq('role', args.role as 'EMPLOYEE' | 'CLIENT' | 'ADMIN'),
+      )
+      .order('desc')
+      .collect();
+
     return users;
   },
 });
@@ -18,22 +38,31 @@ export const list = query({
 export const getCurrentUserProfile = query({
   args: {},
   handler: async (ctx) => {
-    // Get the authenticated user from Better Auth
-    const authUser = await ctx.auth.getUserIdentity();
-    if (!authUser) {
+    let user = await getAuthenticatedUser(ctx);
+
+    if (!user) {
+      // Return null instead of throwing to allow client-side handling
       return null;
     }
 
-    // Find the corresponding user in Convex users table
-    return await ctx.db.query("users")
-      .withIndex("by_email", q => q.eq("email", authUser.email!))
-      .unique();
+    // Generate avatar URL if user has an avatar image
+    let avatarUrl = '';
+    if (user.avatar) {
+      try {
+        avatarUrl = (await ctx.storage.getUrl(user.avatar)) || '';
+      } catch (error) {
+        console.error('Failed to get avatar URL:', error);
+        avatarUrl = '';
+      }
+    }
+
+    return { ...user, avatar: avatarUrl };
   },
 });
 
 // Query to get user by ID from Convex users table
 export const getById = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     return await ctx.db.get(args.userId);
@@ -43,8 +72,9 @@ export const getById = query({
 // Function to sync user from Better Auth to Convex users table
 export const syncUserToTable = async (ctx: any, betterAuthUser: any) => {
   // Check if user already exists
-  const existingUser = await ctx.db.query("users")
-    .withIndex("by_email", (q: any) => q.eq("email", betterAuthUser.email))
+  const existingUser = await ctx.db
+    .query('users')
+    .withIndex('by_email', (q: any) => q.eq('email', betterAuthUser.email))
     .unique();
 
   if (existingUser) {
@@ -52,17 +82,16 @@ export const syncUserToTable = async (ctx: any, betterAuthUser: any) => {
   }
 
   // Create new user in Convex users table
-  const userId = await ctx.db.insert("users", {
+  const userId = await ctx.db.insert('users', {
     email: betterAuthUser.email,
-    name: betterAuthUser.name || betterAuthUser.email.split("@")[0],
-    role: betterAuthUser.role || "CLIENT",
+    name: betterAuthUser.name || betterAuthUser.email.split('@')[0],
+    role: betterAuthUser.role || 'CLIENT',
     enabled: betterAuthUser.enabled ?? true,
     userId: betterAuthUser.id, // Store the Better Auth user ID
   });
 
   return userId;
 };
-
 
 export const updateUserPassword = mutation({
   args: {
@@ -84,8 +113,9 @@ export const getByAuthUserId = query({
   args: { authUserId: v.string() },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
-    return await ctx.db.query("users")
-      .withIndex("by_userId", q => q.eq("userId", args.authUserId))
+    return await ctx.db
+      .query('users')
+      .withIndex('by_userId', (q) => q.eq('userId', args.authUserId))
       .unique();
   },
 });
@@ -95,7 +125,12 @@ export const create = mutation({
     email: v.string(),
     password: v.string(),
     name: v.string(),
-    role: v.union(v.literal("ADMIN"), v.literal("EMPLOYER"), v.literal("CLIENT")),
+    avatar: v.optional(v.id('_storage')),
+    role: v.union(
+      v.literal('ADMIN'),
+      v.literal('EMPLOYEE'),
+      v.literal('CLIENT'),
+    ),
   },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
@@ -110,14 +145,14 @@ export const create = mutation({
     });
 
     if (!session?.user?.id) {
-      throw new Error("Failed to create user in Better Auth");
+      throw new Error('Failed to create user in Better Auth');
     }
 
-    // Sync user to Convex users table with the specified role
-    const userId = await ctx.db.insert("users", {
+    const userId = await ctx.db.insert('users', {
       email: args.email,
       name: args.name,
       role: args.role,
+      avatar: args.avatar,
       enabled: true,
       userId: session.user.id,
     });
@@ -128,10 +163,15 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
     email: v.string(),
     name: v.string(),
-    role: v.union(v.literal("ADMIN"), v.literal("EMPLOYER"), v.literal("CLIENT")),
+    phone: v.optional(v.string()),
+    role: v.union(
+      v.literal('ADMIN'),
+      v.literal('EMPLOYEE'),
+      v.literal('CLIENT'),
+    ),
     enabled: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -139,6 +179,7 @@ export const update = mutation({
     await ctx.db.patch(args.userId, {
       email: args.email,
       name: args.name,
+      phone: args.phone,
       role: args.role,
       enabled: args.enabled,
     });
@@ -146,7 +187,7 @@ export const update = mutation({
 });
 
 export const deleteUser = mutation({
-  args: { userId: v.id("users") },
+  args: { userId: v.id('users') },
   handler: async (ctx, args) => {
     await requireAdmin(ctx);
     await ctx.db.delete(args.userId);

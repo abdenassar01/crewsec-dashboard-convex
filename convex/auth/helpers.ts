@@ -1,34 +1,34 @@
-import { api } from "@convex/_generated/api";
-import { QueryCtx, MutationCtx } from "../_generated/server";
-import { authComponent } from "../auth";
+import { type MutationCtx, type QueryCtx } from '../_generated/server';
+import { authComponent } from '../auth';
 
 export const getAuthenticatedUser = async (ctx: QueryCtx | MutationCtx) => {
-  const authUser = await authComponent.getAuthUser(ctx);
-  console.log("[Debug (Auth User)]: ", authUser);
+  try {
+    const authUser = await authComponent.getAuthUser(ctx);
 
-  if (!authUser) {
-    throw new Error("Not authenticated");
+    if (!authUser?._id) {
+      return null;
+    }
+
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_userId', (q) => q.eq('userId', authUser._id))
+      .unique();
+
+    return user;
+  } catch (error) {
+    console.log('[Debug | auth:getAuthenticatedUser()]: ', error);
+    return null;
   }
-
-  if (!authUser._id) {
-    throw new Error("User is disabled");
-  }
-
-  const user = await ctx.db.query("users")
-    .withIndex("by_userId", q => q.eq("userId", authUser?._id!))
-    .unique();
-
-  return user;
-}
+};
 
 export const requireAdmin = async (ctx: QueryCtx | MutationCtx) => {
   const user = await getAuthenticatedUser(ctx);
 
   // Check if user has ADMIN role in Better Auth
   // The role might be in additionalFields or as a direct property
-  if (user?.role !== "ADMIN") {
-    throw new Error("Not authorized");
+  if (user?.role !== 'ADMIN') {
+    throw new Error('Not authorized');
   }
 
   return user;
-}
+};
