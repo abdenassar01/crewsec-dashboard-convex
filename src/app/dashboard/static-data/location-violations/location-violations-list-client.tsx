@@ -7,7 +7,7 @@ import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 
 interface LocationViolationsListClientProps {
-  onEdit: (locationViolation: Doc<"locationViolations">) => void;
+  onEdit: (locationViolation: Doc<"locationViolations"> & {location: Doc<'locations'> | null, violation: Doc<'violations'> | null} ) => void;
   onAdd: () => void;
 }
 

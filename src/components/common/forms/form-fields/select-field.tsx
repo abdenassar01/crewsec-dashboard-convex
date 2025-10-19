@@ -41,13 +41,13 @@ export function FieldSelect<T>({
 
   return (
     <div ref={dropdownRef} className="relative flex w-full flex-col">
-      <label htmlFor={field.name} className="font-medium">
+      <label htmlFor={field.name} className="font-medium mb-2">
         {label}
       </label>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
-          'bg-background-secondary border-background-secondary text-text dark:text-textdark mt-0 flex w-full items-center justify-between rounded-xl border p-2.5 text-left text-sm font-medium transition-all focus:outline-none',
+          'bg-background-secondary border-background-secondary text-text dark:text-textdark mt-2 flex w-full items-center justify-between rounded-xl border p-2.5 text-left text-sm font-medium transition-all focus:outline-none',
           props.className,
         )}
       >

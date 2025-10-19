@@ -49,6 +49,37 @@ export const list = query({
   },
 });
 
+export const listAll = query({
+  args: {
+    townId: v.optional(v.id('towns')),
+    violationId: v.optional(v.id('violations')),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    let fees = await ctx.db.query('controlFees').order('desc').collect();
+
+    // Filter by town if specified
+    if (args.townId) {
+      fees = fees.filter((fee) => fee.townId === args.townId);
+    }
+
+    // Filter by violation if specified
+    if (args.violationId) {
+      const locationViolations = await ctx.db
+        .query('locationViolations')
+        .withIndex('by_violationId', (q) =>
+          q.eq('violationId', args.violationId!),
+        )
+        .collect();
+      const lvIds = locationViolations.map((lv) => lv._id);
+      fees = fees.filter((fee) => lvIds.includes(fee.locationViolationId));
+    }
+
+    return fees;
+  },
+});
+
 export const create = mutation({
   args: {
     reference: v.string(),

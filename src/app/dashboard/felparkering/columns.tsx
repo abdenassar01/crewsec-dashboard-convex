@@ -58,11 +58,11 @@ export const getColumns = (
     ),
   },
   {
-    accessorKey: "parkingId",
+    accessorKey: "parking",
     header: "Parking",
     cell: ({ row }) => {
-      const parkingId = row.getValue("parkingId") as string;
-      return <div className="font-mono text-sm">{parkingId}</div>;
+      const parking = row.getValue("parking") as Doc<"parkings">;
+      return <div className="font-mono text-sm">{parking.name}</div>;
     },
   },
   {

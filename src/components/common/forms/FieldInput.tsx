@@ -31,7 +31,7 @@ export function FieldInput({ name, label, placeholder, type = "text", password, 
       }}
       children={(field) => (
         <div>
-          <Label htmlFor={field.name}>{label}{required && "*"}</Label>
+          <Label htmlFor={field.name} className="mb-2">{label}{required && "*"}</Label>
           <Input
             id={field.name}
             type={password ? "password" : type}

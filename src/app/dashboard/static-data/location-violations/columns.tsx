@@ -14,21 +14,23 @@ import type { Doc } from "@convex/_generated/dataModel";
 import { Edit01FreeIcons } from "@hugeicons/core-free-icons";
 
 export const getColumns = (
-  onEdit: (locationViolation: Doc<"locationViolations">) => void
-): ColumnDef<Doc<"locationViolations">>[] => [
+  onEdit: (locationViolation: Doc<"locationViolations"> & {location: Doc<'locations'> | null, violation: Doc<'violations'> | null}) => void
+): ColumnDef<Doc<"locationViolations"> & {location: Doc<'locations'> | null, violation: Doc<'violations'> | null}>[] => [
   {
-    accessorKey: "_id",
-    header: "Location ID",
-    cell: ({ row }) => (
-      <div className="font-medium font-mono text-sm">{row.getValue("_id")}</div>
-    ),
+    accessorKey: "violation",
+    header: "Violation",
+    cell: ({ row }) => {
+      const violation = row.getValue("violation") as Doc<"violations"> | null;
+      return <div className="font-medium">{violation?.label || "Unknown Violation"}</div>;
+    },
   },
   {
-    accessorKey: "label",
+    accessorKey: "locationName",
     header: "Location Name",
-    cell: ({ row }) => (
-      <div>{row.getValue("label")}</div>
-    ),
+    cell: ({ row }) => {
+      const location = row.getValue("location") as Doc<"locations"> | null;
+      return <div className="font-medium">{location?.label || "Unknown Location"}</div>;
+    },
   },
   {
     accessorKey: "_creationTime",

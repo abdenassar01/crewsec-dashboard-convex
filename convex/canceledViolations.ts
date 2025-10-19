@@ -27,10 +27,20 @@ export const listForCause = query({
       throw new Error('Not authenticated');
     }
 
-    return await ctx.db
+    const violations = await ctx.db
       .query('canceledViolations')
       .withIndex('by_cause', (q) => q.eq('cause', args.cause))
       .collect();
+
+    return Promise.all(
+      violations.map(async (violation) => {
+        const parking = await ctx.db.get(violation.parkingId);
+        return {
+          ...violation,
+          parking,
+        };
+      })
+    );
   },
 });
 

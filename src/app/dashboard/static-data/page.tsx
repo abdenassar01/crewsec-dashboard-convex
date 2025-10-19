@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTable } from "@/components/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+
 import type { Doc } from "@convex/_generated/dataModel";
 import { AddSquareFreeIcons } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -149,7 +147,7 @@ export default function StaticDataPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Static Data Management</h1>
         <Button onClick={handleAdd}>
